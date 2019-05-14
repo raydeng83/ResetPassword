@@ -1,0 +1,239 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_ 0_0.xsd">
+
+    <parent>
+        <groupId>products</groupId>
+        <artifactId>pingfederate-server-project-aggregator</artifactId>
+        <version>9.1.4.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <name>PingFederate Core Plugins</name>
+    <groupId>products.plugins</groupId>
+    <artifactId>pf-core-plugins</artifactId>
+    <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <ping.pfconfig.basedir>../HuronPeak/config</ping.pfconfig.basedir>
+        <ping.protocolengine.basedir>../HuronPeak/server/protocol-engine</ping.protocolengine.basedir>
+        <ping.provisioner.basedir>../HuronPeak/server/provisioner</ping.provisioner.basedir>
+    </properties>
+
+    <dependencies>
+
+        <!-- Placed javassist up here to override
+             the older version used by pf-protocolengine -->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.22.0-GA</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>pingfederate</groupId>
+            <artifactId>pf-protocolengine</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>pingfederate</groupId>
+            <artifactId>pf-commons</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>pingfederate</groupId>
+            <artifactId>pf-protocolengine</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>pingfederate</groupId>
+            <artifactId>provisioner</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>products</groupId>
+            <artifactId>provisioner-sdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>pingfederate</groupId>
+            <artifactId>pf-adminconsole-base</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+           <groupId>com.pingone.prov</groupId>
+  		   <artifactId>scim-core-1.1</artifactId>
+  	       <version>14.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>${version.jackson}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>3.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- using 2.8.9 because powermock 1.7.3 does not
+             work with more recent version of mockito (2.13.1) -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.8.9</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>1.7.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>1.7.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>products.plugins.integration-kits.pf-pingid-integration-kit</groupId>
+            <artifactId>pf-pingid-idp-adapter</artifactId>
+            <version>1.4.0</version>
+            <scope>provided</scope>
+        </dependency>
+		
+		<dependency>
+            <groupId>pingfederate</groupId>
+            <artifactId>pf-sms-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                    <runOrder>${maven.surefire.runOrder}</runOrder>
+                    <systemProperties>
+                        <property>
+                            <name>pf.server.default.dir</name>
+                            <value>${basedir}/target/fsenvtest/server/default</value>
+                        </property>
+                        <property>
+                            <name>pf.server.data.dir</name>
+                            <value>${basedir}/target/fsenvtest/server/default/data</value>
+                        </property>
+                        <property>
+                            <name>test.resources.dir</name>
+                            <value>${basedir}/src/test/resources</value>
+                        </property>
+                    </systemProperties>
+                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.build.directory}/fsenvtest/server/default" />
+                                <mkdir dir="${project.build.directory}/fsenvtest/server/default" />
+                                <copy todir="${project.build.directory}/fsenvtest/server/default">
+                                    <fileset dir="${ping.protocolengine.basedir}/src/test/resources" />
+                                    <fileset dir="${ping.pfconfig.basedir}/default-conf" />
+                                </copy>
+                                <copy todir="${project.build.directory}/fsenvtest/server/default" overwrite="true">
+                                    <fileset dir="${ping.protocolengine.basedir}/src/main/config/unittest-conf" />
+                                </copy>
+                                <copy todir="${project.build.directory}/fsenvtest/server/default" overwrite="true">
+                                    <fileset dir="${ping.protocolengine.basedir}/src/main/config/regression-test-conf" />
+                                </copy>
+                                <copy todir="${project.build.directory}/fsenvtest/server/default/data" overwrite="true">
+                                    <fileset dir="${ping.provisioner.basedir}/src/test/resources/data" />
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

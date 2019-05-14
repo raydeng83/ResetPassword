@@ -1,0 +1,2 @@
+org.sourceid.wstrust.processor.kerberos.KerberosTokenProcessor
+com.pingidentity.pf.tokenprocessors.username.UsernameTokenProcessor
