@@ -2,15 +2,17 @@ package com.efx.pingfed.adapters.htmlform.pwdreset.servlet;
 
 import com.efx.pingfed.adapters.htmlform.pwdreset.common.PasswordManagementConfiguration;
 import com.efx.pingfed.adapters.htmlform.pwdreset.handler.PingIDHandler;
-import com.efx.pingfed.adapters.htmlform.pwdreset.model.PingIDForm;
-import com.efx.pingfed.adapters.htmlform.pwdreset.type.PingIDResult;
-import com.efx.pingfed.adapters.htmlform.pwdreset.util.PwdResetAuditLogger;
+import com.pingidentity.adapters.htmlform.pwdreset.model.PingIDForm;
+import com.pingidentity.adapters.htmlform.pwdreset.type.PingIDResult;
+import com.pingidentity.adapters.htmlform.pwdreset.util.PwdResetAuditLogger;
+import com.pingidentity.adapters.htmlform.pwdreset.util.SessionStateUtil;
 import com.efx.pingfed.adapters.htmlform.pwdreset.util.UrlUtil;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 
 
 public class PingIDServlet
@@ -31,12 +33,12 @@ public class PingIDServlet
     
     PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
     
-//    if ((!validStage("stage1End", request, response)) || (!validResetType(configuration.getResetType()))) {
-//      PwdResetAuditLogger.logFailure("Invalid state (unauthorized method)");
-//      redirect(response, urlUtil.buildErrorUrl("forgot-password-error.invalidState"));
-//      return;
-//    }
-//
+    // if ((!validStage("stage1End", request, response)) || (!validResetType(configuration.getResetType()))) {
+    //   PwdResetAuditLogger.logFailure("Invalid state (unauthorized method)");
+    //   redirect(response, urlUtil.buildErrorUrl("forgot-password-error.invalidState"));
+    //   return;
+    // }
+    
     PingIDForm form = new PingIDForm(this.sessionUtil, request, response);
     PwdResetAuditLogger.setUserName(form.getUsername());
     PingIDHandler handler = new PingIDHandler(configuration);
@@ -99,9 +101,7 @@ public class PingIDServlet
     
     setStage("stage2End", request, response);
     String url;
-    String url;
-    String url;
-    String url; switch (result)
+    switch (result)
     {
     case Success: 
       setStage("stage2Authenticated", request, response);

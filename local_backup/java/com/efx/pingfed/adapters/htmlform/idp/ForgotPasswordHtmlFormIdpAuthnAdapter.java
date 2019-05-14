@@ -14,7 +14,7 @@ import com.pingidentity.adapters.htmlform.pwdreset.servlet.ErrorServlet;
 import com.pingidentity.adapters.htmlform.pwdreset.servlet.PingIDServlet;
 import com.pingidentity.adapters.htmlform.pwdreset.servlet.ResetServlet;
 import com.pingidentity.adapters.htmlform.pwdreset.servlet.ResumeServlet;
-import com.pingidentity.adapters.htmlform.pwdreset.servlet.SecurityCodeServlet;
+import com.efx.pingfed.adapters.htmlform.pwdreset.servlet.SecurityCodeServlet;
 import com.pingidentity.adapters.htmlform.session.HtmlFormSessionStateSupport;
 import com.pingidentity.captcha.CaptchaServerSideValidator;
 import com.pingidentity.captcha.CaptchaValidationError;
@@ -903,6 +903,7 @@ public class ForgotPasswordHtmlFormIdpAuthnAdapter implements IdpAuthenticationA
   private void registerPasswordResetHandlers()
   {
     HandlerRegistry.registerHandler("/pwdreset/Identify", new com.efx.pingfed.adapters.htmlform.pwdreset.servlet.IdentifyServlet());
+    HandlerRegistry.registerHandler("/pwdreset/SelectMethod", new com.efx.pingfed.adapters.htmlform.pwdreset.servlet.SelectMethodServlet());
     HandlerRegistry.registerHandler("/pwdreset/SecurityCode", new SecurityCodeServlet());
     HandlerRegistry.registerHandler("/pwdreset/Success", new com.pingidentity.adapters.htmlform.pwdreset.servlet.SuccessServlet());
     HandlerRegistry.registerHandler("/pwdreset/Resume", new ResumeServlet());

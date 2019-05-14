@@ -12,6 +12,7 @@ import com.pingidentity.captcha.CaptchaServerSideValidator;
 import com.pingidentity.captcha.CaptchaValidationError;
 import com.pingidentity.common.util.CrossSiteRequestForgeryHelper;
 import com.pingidentity.common.util.EscapeUtils;
+import com.pingidentity.sdk.password.ResettablePasswordCredential;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +22,7 @@ import org.sourceid.oauth20.handlers.HandlerUtil;
 import org.sourceid.saml20.domain.mgmt.InvalidRedirectValidationException;
 import org.sourceid.saml20.domain.mgmt.MgmtFactory;
 import org.sourceid.saml20.domain.mgmt.TargetResourceValidationMgr;
+import org.sourceid.util.log.AttributeMap;
 import org.sourceid.websso.servlet.reqparam.InvalidRequestParameterException;
 import org.sourceid.websso.profiles.ProcessRuntimeException;
 
@@ -68,6 +70,34 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
 
         PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
 
+        AttributeMap userAttributes = null;
+        String selectedPcvId = null;
+
+        for (String pcvId : configuration.getPcvIds())
+        {
+            try
+            {
+                userAttributes = getAttributes(username, pcvId);
+
+                if (userAttributes != null)
+                {
+                    selectedPcvId = pcvId;
+                    if(userAttributes.getSingleValue("mail") != null && !userAttributes.getSingleValue("mail").isEmpty()) {
+                        defaultParams.put("hasOTP", true);
+                    }
+
+                    if(userAttributes.getSingleValue("mobile") != null && !userAttributes.getSingleValue("mobile").isEmpty()) {
+                        defaultParams.put("hasSMS", true);
+                    }
+                    break;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.error("Error retrieving user attributes. " + e.getMessage());
+                logger.debug(e);
+            }
+        }
 
         render(request, response, defaultParams);
     }
@@ -125,6 +155,9 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
             throws IOException
     {
         logger.debug("POST Request to /ext/pwdreset/SelectMethod");
+
+        String recoveryOption = request.getParameter("recoveryOption");
+        logger.info("The selected recovery option is ... " + recoveryOption);
         
         UrlUtil urlUtil = new UrlUtil(request);
         PwdResetAuditLogger.init("PWD_RESET_REQUEST", request, response);
@@ -145,6 +178,14 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
         // String adapterId = getAdapterId(request, response);
         String adapterId = "ForgotPasswordAdapter";
         PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
+
+        if(recoveryOption.equals("OTP")) {
+            configuration.setResetType("OTP");
+        } else if (recoveryOption.equals("SMS")) {
+            configuration.setResetType("SMS");
+        } else if (recoveryOption.equals("PingID")) {
+            configuration.setResetType("PingID");
+        }
 
         try
         {
@@ -326,5 +367,26 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
             logger.error("Error on Request to /ext/pwdreset/Identify", ex);
             throw new ProcessRuntimeException(ex);
         }
+    }
+
+    private AttributeMap getAttributes(String username, String pcvId) {
+        try {
+            ResettablePasswordCredential pcv = (ResettablePasswordCredential)MgmtFactory.getCredentialValidatorManager().getValidator(pcvId);
+            return pcv.findUser(username);
+
+        }
+        catch (Exception e)
+        {
+            if ((e.getMessage() != null) && (e.getMessage().contains("User not found")))
+            {
+                logger.debug(e.getMessage());
+            }
+            else
+            {
+                logger.error("Error retrieving user attributes. " + e.getMessage());
+                logger.debug(e);
+            }
+        }
+        return null;
     }
 }

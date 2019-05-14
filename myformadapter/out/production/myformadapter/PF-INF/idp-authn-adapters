@@ -1,0 +1,4 @@
+com.pingidentity.adapters.htmlform.idp.HtmlFormIdpAuthnAdapter
+com.pingidentity.adapters.httpbasic.idp.HttpBasicIdpAuthnAdapter
+com.pingidentity.pf.adapters.composite.CompositeAdapter
+com.pingidentity.adapters.kerberos.idp.KerberosAuthenticationAdapter

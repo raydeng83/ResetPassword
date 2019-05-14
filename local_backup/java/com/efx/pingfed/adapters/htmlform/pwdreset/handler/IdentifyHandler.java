@@ -3,7 +3,7 @@ package com.efx.pingfed.adapters.htmlform.pwdreset.handler;
 import com.efx.pingfed.adapters.htmlform.pwdreset.common.PasswordManagementConfiguration;
 import com.pingidentity.adapters.htmlform.pwdreset.model.GeneratedCode;
 import com.pingidentity.adapters.htmlform.pwdreset.model.IdentifyForm;
-import com.pingidentity.adapters.htmlform.pwdreset.type.IdentifyResult;
+import com.efx.pingfed.adapters.htmlform.pwdreset.type.IdentifyResult;
 import com.efx.pingfed.adapters.htmlform.pwdreset.util.CodeGenerationUtil;
 import com.pingidentity.adapters.htmlform.pwdreset.util.SessionStateUtil;
 import com.pingidentity.email.util.NotificationSupportHelper;
@@ -34,16 +34,17 @@ import org.sourceid.util.log.AttributeMap;
 import org.sourceid.websso.servlet.reqparam.InvalidRequestParameterException;
 
 public class IdentifyHandler
-  extends BaseHandler
+
+        extends BaseHandler
 {
   private static final Logger logger = LogManager.getLogger(IdentifyHandler.class);
-  
+
   private PFInternalTokenGenerator pfInternalTokenGenerator = new JwtTokenGeneratorImpl(new PFResetPasswordtoJwtTranslator());
-  
+
   public IdentifyHandler(PasswordManagementConfiguration configuration) {
     super(configuration);
   }
-  
+
   public IdentifyResult validateUsername(IdentifyForm identifyForm, HttpServletRequest request, HttpServletResponse response) {
     boolean isUsernameRecovery = (request.getParameter("pf.usernamerecovery") != null) && ("clicked".equals(request.getParameter("pf.usernamerecovery")));
     if (isUsernameRecovery)
@@ -54,22 +55,24 @@ public class IdentifyHandler
       logger.debug("Form was not submitted");
       return IdentifyResult.Cancel;
     }
-    
+
     if ((identifyForm.getUsername() == null) || (identifyForm.getUsername().isEmpty())) {
       logger.debug("No Username found in the form data");
       return IdentifyResult.NoUsername;
     }
-    
+
     AttributeMap userAttributes = null;
     String selectedPcvId = null;
-    
+
 
     for (String pcvId : this.configuration.getPcvIds())
     {
       try
       {
         userAttributes = getAttributes(identifyForm.getUsername(), pcvId);
-        
+
+        logger.info("Getting User Attributes..." + userAttributes);
+
         if (userAttributes != null)
         {
           selectedPcvId = pcvId;
@@ -83,7 +86,7 @@ public class IdentifyHandler
         return null;
       }
     }
-    
+
     GeneratedCode gc = null;
     String referenceId = null;
     if (("OTL".equals(this.configuration.getResetType())) && (userAttributes != null))
@@ -96,12 +99,11 @@ public class IdentifyHandler
       {
         adapterId = request.getParameter("adapterId");
       }
-      
+
       String code = adapterId + ":" + selectedPcvId + ":" + IDGenerator.rndAlphaNumeric(22);
-      
+
 
       Map<String, AttributeValue> attrs = new HashMap();
-      
 
       attrs.put("prCodeMapCode", new AttributeValue(code));
       attrs.put("prUsername", new AttributeValue(identifyForm.getUsername()));
@@ -109,7 +111,7 @@ public class IdentifyHandler
       attrs.put("adapterId", new AttributeValue(adapterId));
       attrs.put("prEnableRememberUsername", new AttributeValue(request.getParameter("prEnableRememberUsername")));
       attrs.put("prExpTime", new AttributeValue(String.valueOf(DateUtils.addMinutes(new Date(), this.configuration.getExpirationMinutes()).getTime())));
-      
+
       try
       {
         referenceId = this.pfInternalTokenGenerator.encrypt(attrs);
@@ -118,12 +120,11 @@ public class IdentifyHandler
       {
         throw new InvalidRequestParameterException(e.getMessage());
       }
-      
+
     }
     else
     {
       gc = CodeGenerationUtil.getGeneratedCode(this.configuration);
-      
 
 
       this.sessionUtil.add("prCodeMap", gc.getAttributeMap(), request, response);
@@ -138,39 +139,41 @@ public class IdentifyHandler
       this.sessionUtil.add("adapterId", adapterIdQueryParam, request, response);
       this.sessionUtil.add("prEnableRememberUsername", request.getParameter("prEnableRememberUsername"), request, response);
     }
-    
+
     if (userAttributes == null)
     {
       logger.debug("Attributes not found for user: " + identifyForm.getUsername());
       return IdentifyResult.UserNotFound;
     }
-    
+
+
     Locale locale = LocaleUtil.getUserLocale(request);
-    
+
     return doReset(identifyForm, userAttributes, gc, referenceId, selectedPcvId, locale);
   }
-  
+
   private IdentifyResult doReset(IdentifyForm identifyForm, AttributeMap userAttributes, GeneratedCode generatedCode, String referenceId, String pcvId, Locale locale)
   {
+    logger.info("The reset type got from configuraiton is: " + this.configuration.getResetType());
     switch (this.configuration.getResetType())
     {
-    case "OTL": 
-      return sendOneTimeLink(identifyForm, userAttributes, referenceId, pcvId, locale);
-    case "OTP": 
-      return sendOneTimePassword(identifyForm, userAttributes, generatedCode, pcvId, locale);
-    case "PingID": 
-      return IdentifyResult.PingID;
-    case "SMS": 
-      return sendTextMesage(identifyForm, userAttributes, generatedCode, pcvId, locale);
+
+      case "OTL":
+        return sendOneTimeLink(identifyForm, userAttributes, referenceId, pcvId, locale);
+      case "OTP":
+        return sendOneTimePassword(identifyForm, userAttributes, generatedCode, pcvId, locale);
+      case "PingID":
+        return IdentifyResult.PingID;
+      case "SMS":
+        return sendTextMesage(identifyForm, userAttributes, generatedCode, pcvId, locale);
     }
     return IdentifyResult.Error;
   }
-  
 
   private IdentifyResult sendOneTimePassword(IdentifyForm identifyForm, AttributeMap userAttributes, GeneratedCode generatedCode, String pcvId, Locale locale)
   {
     logger.debug("Starting Reset flow using OTP");
-    
+
     ResettablePasswordCredential pcv = getPcv(pcvId);
     String email = userAttributes.getSingleValue(pcv.getMailAttribute());
     if ((email != null) && (!email.isEmpty()))
@@ -179,58 +182,54 @@ public class IdentifyHandler
       if ((name == null) || (name.isEmpty())) {
         name = identifyForm.getUsername();
       }
-      
+
       boolean isEmailVerified = this.configuration.isRequireVerifiedEmail() ? Boolean.valueOf(userAttributes.getSingleValue(pcv.getMailVerifiedAttribute())).booleanValue() : true;
-      
+
       if (isEmailVerified)
       {
         NotificationSupportHelper notificationSupportHelper = new NotificationSupportHelper();
         notificationSupportHelper.sendPasswordResetCode(email, name, generatedCode.getCode(), this.configuration
-          .getAdapterId(), pcvId, locale);
-        
+                .getAdapterId(), pcvId, locale);
+
         logger.debug("Email sent to " + identifyForm.getUsername() + " at " + email);
         return IdentifyResult.CodeSent;
       }
-      
 
       logger.error("Email was not sent to '" + identifyForm.getUsername() + "' as '" + email + "' is not verified.");
       return IdentifyResult.EmailUnverifiedCodeNotSent;
     }
-    
-
 
     logger.error("No email address found in directory for user: " + identifyForm.getUsername());
     return IdentifyResult.NoEmailAddress;
   }
-  
 
 
   private IdentifyResult sendOneTimeLink(IdentifyForm identifyForm, AttributeMap userAttributes, String referenceId, String pcvId, Locale locale)
   {
     logger.debug("Starting Reset flow using OTL");
     ResettablePasswordCredential pcv = getPcv(pcvId);
-    
+
     String email = userAttributes.getSingleValue(pcv.getMailAttribute());
-    
+
     if ((email != null) && (!email.isEmpty())) {
       String name = userAttributes.getSingleValue(pcv.getNameAttribute());
       if ((name == null) || (name.isEmpty())) {
         name = identifyForm.getUsername();
       }
-      
+
       try
       {
         boolean isEmailVerified = this.configuration.isRequireVerifiedEmail() ? Boolean.valueOf(userAttributes.getSingleValue(pcv.getMailVerifiedAttribute())).booleanValue() : true;
-        
+
         if (isEmailVerified)
         {
           NotificationSupportHelper notificationSupportHelper = new NotificationSupportHelper();
           notificationSupportHelper.sendPasswordResetOneTimeLink(email, name, referenceId, "/ext/pwdreset/Resume", this.configuration
-            .getAdapterId(), pcvId, locale);
+
+                  .getAdapterId(), pcvId, locale);
           logger.debug("Email sent successfully to " + identifyForm.getUsername() + " at " + email);
           return IdentifyResult.LinkSent;
         }
-        
 
         logger.error("Email was not sent to '" + identifyForm.getUsername() + "' as '" + email + "' is not verified.");
         return IdentifyResult.EmailUnverifiedLinkNotSent;
@@ -242,42 +241,39 @@ public class IdentifyHandler
         return IdentifyResult.Error;
       }
     }
-    
+
     logger.error("No email address found in directory for user: " + identifyForm.getUsername());
     return IdentifyResult.NoEmailAddress;
   }
-  
 
 
   private IdentifyResult sendTextMesage(IdentifyForm identifyForm, AttributeMap userAttributes, GeneratedCode generatedCode, String pcvId, Locale locale)
   {
     logger.debug("Starting Reset flow using SMS");
-    
+
+
     ResettablePasswordCredential pcv = getPcv(pcvId);
     String toNumber = userAttributes.getSingleValue(pcv.getSmsAttribute());
-    if ((toNumber != null) && (!toNumber.isEmpty()) && (generatedCode != null) && 
-      (StringUtils.isNotEmpty(generatedCode.getCode())))
+    if ((toNumber != null) && (!toNumber.isEmpty()) && (generatedCode != null) &&
+            (StringUtils.isNotEmpty(generatedCode.getCode())))
     {
 
       NotificationSettings settings = MgmtFactory.getNotificationMgr().getNotificationSettings();
       SmsSettings smsInfo = new SmsSettings(settings.getSmsAccountId(), settings.getSmsAuthToken(), settings.getSmsFromNumber());
       SmsHelper smsHelper = new SmsHelper(smsInfo);
       boolean smsResult = smsHelper.sendPasswordResetCode(generatedCode.getCode(), toNumber, locale);
-      
+
       if (smsResult)
       {
         logger.debug("SMS sent successfully to: " + identifyForm.getUsername() + " at " + toNumber);
         return IdentifyResult.SmsSent;
       }
-      
+
       logger.debug("SMS not sent successfully to: " + identifyForm.getUsername() + " at " + toNumber);
       return IdentifyResult.SmsNotSent;
     }
-    
 
     logger.debug("No mobile phone found for user: " + identifyForm.getUsername());
     return IdentifyResult.NoMobilePhone;
   }
 }
-
-

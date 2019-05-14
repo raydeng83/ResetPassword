@@ -82,7 +82,6 @@ public class SelectMethodHandler extends BaseHandler
         GeneratedCode gc = null;
         String referenceId = null;
 
-        this.configuration.setResetType("OTP");
         if (("OTL".equals(this.configuration.getResetType())) && (userAttributes != null))
         {
             String adapterId = request.getParameter("AdapterId");
@@ -148,7 +147,6 @@ public class SelectMethodHandler extends BaseHandler
 
     private IdentifyResult doReset(IdentifyForm identifyForm, AttributeMap userAttributes, GeneratedCode generatedCode, String referenceId, String pcvId, Locale locale)
     {
-        this.configuration.setResetType("OTP");
         switch (this.configuration.getResetType())
         {
             case "OTL":

@@ -1,0 +1,9 @@
+com.pingidentity.selectors.ClusterNodeAdapterSelector
+com.pingidentity.pf.selectors.cidr.CIDRAdapterSelector
+com.pingidentity.pf.selectors.connectionset.ConnectionSetAdapterSelector
+com.pingidentity.pf.selectors.http.HTTPHeaderAdapterSelector
+com.pingidentity.pf.selectors.oauthclient.OAuthClientAdapterSelector
+com.pingidentity.pf.selectors.oauthscope.OAuthScopeAdapterSelector
+com.pingidentity.pf.selectors.saml.SamlAuthnContextAdapterSelector
+com.pingidentity.pf.selectors.http.HttpRequestParamAuthnSelector
+com.pingidentity.pf.selectors.session.SessionAuthnSelector

@@ -13,7 +13,7 @@ import com.pingidentity.adapters.htmlform.pwdreset.model.BaseForm;
 import com.pingidentity.adapters.htmlform.pwdreset.type.ResetResult;
 import com.pingidentity.adapters.htmlform.pwdreset.util.PwdResetAuditLogger;
 import com.pingidentity.adapters.htmlform.pwdreset.util.SessionStateUtil;
-import com.pingidentity.adapters.htmlform.pwdreset.util.UrlUtil;
+import com.efx.pingfed.adapters.htmlform.pwdreset.util.UrlUtil;
 import com.pingidentity.common.security.AccountLockingService;
 import com.pingidentity.common.util.CrossSiteRequestForgeryHelper;
 import com.pingidentity.common.util.EscapeUtils;

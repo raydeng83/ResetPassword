@@ -147,8 +147,8 @@ public class IdentifyServlet
         PwdResetAuditLogger.setUserName(form.getUsername());
         IdentifyHandler handler = new IdentifyHandler(configuration);
 
-        // validationResult = handler.validateUsername(form, request, response);
-        validationResult = IdentifyResult.UserFound;
+         validationResult = handler.validateUsername(form, request, response);
+//        validationResult = IdentifyResult.UserFound;
 
       }
 

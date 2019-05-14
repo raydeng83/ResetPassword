@@ -47,9 +47,3 @@ public class SecurityCodeHandler
     return SecurityCodeResult.InvalidCode;
   }
 }
-
-
-/* Location:              D:\workhouse\PasswordReset\myformadapter\src\!\com\pingidentity\adapters\htmlform\pwdreset\handler\SecurityCodeHandler.class
- * Java compiler version: 8 (52.0)
- * JD-Core Version:       0.7.1
- */
