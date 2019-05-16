@@ -3,6 +3,8 @@ package com.efx.pingfed.adapters.htmlform.pwdreset.servlet;
 import com.efx.pingfed.adapters.htmlform.idp.ForgotPasswordHtmlFormIdpAuthnAdapter;
 import com.efx.pingfed.adapters.htmlform.pwdreset.common.PasswordManagementConfiguration;
 import com.efx.pingfed.adapters.htmlform.pwdreset.handler.SelectMethodHandler;
+import com.efx.pingfed.adapters.htmlform.pwdreset.ldap.LdapOperation;
+import com.efx.pingfed.adapters.htmlform.pwdreset.ldap.LdapUser;
 import com.efx.pingfed.adapters.htmlform.pwdreset.type.IdentifyResult;
 import com.pingidentity.adapters.htmlform.pwdreset.model.IdentifyForm;
 import com.pingidentity.adapters.htmlform.pwdreset.util.PwdResetAuditLogger;
@@ -77,20 +79,34 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
         {
             try
             {
-                userAttributes = getAttributes(username, pcvId);
+                LdapUser ldapUser = LdapOperation.getInstance().searchUser(username);
+                logger.info("User found in ldap is " + ldapUser);
 
-                if (userAttributes != null)
-                {
+                if ( ldapUser != null) {
                     selectedPcvId = pcvId;
-                    if(userAttributes.getSingleValue("mail") != null && !userAttributes.getSingleValue("mail").isEmpty()) {
+                    if(ldapUser.getEmailAddress() != null) {
                         defaultParams.put("hasOTP", true);
                     }
-
-                    if(userAttributes.getSingleValue("mobile") != null && !userAttributes.getSingleValue("mobile").isEmpty()) {
+                    if(ldapUser.getMobile() != null) {
                         defaultParams.put("hasSMS", true);
                     }
                     break;
                 }
+
+//                userAttributes = getAttributes(username, pcvId);
+//
+//                if (userAttributes != null)
+//                {
+//                    selectedPcvId = pcvId;
+//                    if(userAttributes.getSingleValue("mail") != null && !userAttributes.getSingleValue("mail").isEmpty()) {
+//                        defaultParams.put("hasOTP", true);
+//                    }
+//
+//                    if(userAttributes.getSingleValue("mobile") != null && !userAttributes.getSingleValue("mobile").isEmpty()) {
+//                        defaultParams.put("hasSMS", true);
+//                    }
+//                    break;
+//                }
             }
             catch (Exception e)
             {
@@ -158,7 +174,7 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
 
         String recoveryOption = request.getParameter("recoveryOption");
         logger.info("The selected recovery option is ... " + recoveryOption);
-        
+
         UrlUtil urlUtil = new UrlUtil(request);
         PwdResetAuditLogger.init("PWD_RESET_REQUEST", request, response);
         Map<String, Object> defaultParams = getDefaultParams(request);
@@ -183,6 +199,7 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
             configuration.setResetType("OTP");
         } else if (recoveryOption.equals("SMS")) {
             configuration.setResetType("SMS");
+
         } else if (recoveryOption.equals("PingID")) {
             configuration.setResetType("PingID");
         }
@@ -213,9 +230,12 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
                 PwdResetAuditLogger.setUserName(form.getUsername());
                 SelectMethodHandler handler = new SelectMethodHandler(configuration);
                 validationResult = handler.validateUsername(form, request, response);
-               // validationResult = IdentifyResult.CodeSent;
+                // validationResult = IdentifyResult.CodeSent;
 
             }
+            setStage("stage1End", request, response);
+            this.sessionUtil.add("adapterId", configuration.getAdapterId(), request, response);
+
         }
         catch (InvalidRequestParameterException e)
         {
@@ -252,7 +272,6 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
             case SmsSent:
             case SmsNotSent:
             case NoMobilePhone:
-                setStage("stage1End", request, response);
 
                 redirect(response, urlUtil.buildSecurityCodeUrl());
                 break;
@@ -389,4 +408,12 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
         }
         return null;
     }
+
+    private com.pingidentity.adapters.htmlform.pwdreset.common.PasswordManagementConfiguration getOriginalPasswordManagementConfiguration(HttpServletRequest request, HttpServletResponse response)
+    {
+        String adapterId = getAdapterId(request, response);
+        return com.pingidentity.adapters.htmlform.pwdreset.common.PasswordResetConfigHelper.get(adapterId);
+    }
+
+
 }

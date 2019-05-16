@@ -147,8 +147,10 @@ public class IdentifyServlet
         PwdResetAuditLogger.setUserName(form.getUsername());
         IdentifyHandler handler = new IdentifyHandler(configuration);
 
-         validationResult = handler.validateUsername(form, request, response);
-//        validationResult = IdentifyResult.UserFound;
+        configuration.setResetType("OTP"); //set reset type to "OTP" for debugging
+        validationResult = handler.validateUsername(form, request, response);
+        logger.info("The returned validationResult is: " + validationResult);
+        // validationResult = IdentifyResult.UserFound;
 
       }
 

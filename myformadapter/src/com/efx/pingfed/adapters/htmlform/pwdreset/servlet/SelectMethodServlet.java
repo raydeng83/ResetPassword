@@ -3,6 +3,8 @@ package com.efx.pingfed.adapters.htmlform.pwdreset.servlet;
 import com.efx.pingfed.adapters.htmlform.idp.ForgotPasswordHtmlFormIdpAuthnAdapter;
 import com.efx.pingfed.adapters.htmlform.pwdreset.common.PasswordManagementConfiguration;
 import com.efx.pingfed.adapters.htmlform.pwdreset.handler.SelectMethodHandler;
+import com.efx.pingfed.adapters.htmlform.pwdreset.ldap.LdapOperation;
+import com.efx.pingfed.adapters.htmlform.pwdreset.ldap.LdapUser;
 import com.efx.pingfed.adapters.htmlform.pwdreset.type.IdentifyResult;
 import com.pingidentity.adapters.htmlform.pwdreset.model.IdentifyForm;
 import com.pingidentity.adapters.htmlform.pwdreset.util.PwdResetAuditLogger;
@@ -43,9 +45,6 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
     {
         logger.info("GET Request to /ext/pwdreset/SelectMethod");
 
-        String recoveryOption = request.getParameter("recoveryOption");
-        logger.info("The selected recovery option is ... " + recoveryOption);
-
         UrlUtil urlUtil = new UrlUtil(request);
         PwdResetAuditLogger.init("PWD_RESET_REQUEST", request, response);
         Map<String, Object> defaultParams = getDefaultParams(request);
@@ -73,14 +72,6 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
 
         PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
 
-        if(recoveryOption.equals("OTP")) {
-            configuration.setResetType("OTP");
-        } else if (recoveryOption.equals("SMS")) {
-            configuration.setResetType("SMS");
-        } else if (recoveryOption.equals("PingID")) {
-            configuration.setResetType("PingID");
-        }
-
         AttributeMap userAttributes = null;
         String selectedPcvId = null;
 
@@ -88,20 +79,23 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
         {
             try
             {
-                userAttributes = getAttributes(username, pcvId);
+                LdapUser ldapUser = LdapOperation.getInstance().searchUser(username);
+                logger.info("User found in ldap is " + ldapUser);
 
-                if (userAttributes != null)
-                {
-                    selectedPcvId = pcvId;
-                    if(userAttributes.getSingleValue("mail") != null && !userAttributes.getSingleValue("mail").isEmpty()) {
-                        defaultParams.put("hasOTP", true);
-                    }
-
-                    if(userAttributes.getSingleValue("mobile") != null && !userAttributes.getSingleValue("mobile").isEmpty()) {
-                        defaultParams.put("hasSMS", true);
-                    }
-                    break;
-                }
+//                userAttributes = getAttributes(username, pcvId);
+//
+//                if (userAttributes != null)
+//                {
+//                    selectedPcvId = pcvId;
+//                    if(userAttributes.getSingleValue("mail") != null && !userAttributes.getSingleValue("mail").isEmpty()) {
+//                        defaultParams.put("hasOTP", true);
+//                    }
+//
+//                    if(userAttributes.getSingleValue("mobile") != null && !userAttributes.getSingleValue("mobile").isEmpty()) {
+//                        defaultParams.put("hasSMS", true);
+//                    }
+//                    break;
+//                }
             }
             catch (Exception e)
             {
@@ -189,6 +183,14 @@ public class SelectMethodServlet extends AbstractPasswordResetServlet
         // String adapterId = getAdapterId(request, response);
         String adapterId = "ForgotPasswordAdapter";
         PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
+
+        if(recoveryOption.equals("OTP")) {
+            configuration.setResetType("OTP");
+        } else if (recoveryOption.equals("SMS")) {
+            configuration.setResetType("SMS");
+        } else if (recoveryOption.equals("PingID")) {
+            configuration.setResetType("PingID");
+        }
 
         try
         {

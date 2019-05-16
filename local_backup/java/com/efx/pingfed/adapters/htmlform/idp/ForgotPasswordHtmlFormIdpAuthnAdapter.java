@@ -910,7 +910,8 @@ public class ForgotPasswordHtmlFormIdpAuthnAdapter implements IdpAuthenticationA
     HandlerRegistry.registerHandler("/pwdreset/Error", new ErrorServlet());
     HandlerRegistry.registerHandler("/pwdreset/Reset", new ResetServlet());
     HandlerRegistry.registerHandler("/pwdreset/Unlock", new AccountUnlockServlet());
-    HandlerRegistry.registerHandler("/pwdreset/PingID", new PingIDServlet());
+    HandlerRegistry.registerHandler("/pwdreset/PingID", new com.efx.pingfed.adapters.htmlform.pwdreset.servlet.PingIDServlet());
+
   }
   
   private void registerChangePasswordHandlers()

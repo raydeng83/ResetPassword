@@ -3,16 +3,15 @@ package com.efx.pingfed.adapters.htmlform.pwdreset.servlet;
 import com.efx.pingfed.adapters.htmlform.pwdreset.common.PasswordManagementConfiguration;
 import com.efx.pingfed.adapters.htmlform.pwdreset.handler.PingIDHandler;
 import com.pingidentity.adapters.htmlform.pwdreset.model.PingIDForm;
+import com.efx.pingfed.adapters.htmlform.pwdreset.servlet.AbstractPasswordResetServlet;
 import com.pingidentity.adapters.htmlform.pwdreset.type.PingIDResult;
 import com.pingidentity.adapters.htmlform.pwdreset.util.PwdResetAuditLogger;
-import com.pingidentity.adapters.htmlform.pwdreset.util.SessionStateUtil;
 import com.efx.pingfed.adapters.htmlform.pwdreset.util.UrlUtil;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 public class PingIDServlet
@@ -20,10 +19,6 @@ public class PingIDServlet
 {
   private static Log logger = LogFactory.getLog(PingIDServlet.class);
   
-
-
-
-
   public void doGet(HttpServletRequest request, HttpServletResponse response)
   {
     PwdResetAuditLogger.init("PWD_RESET_REQUEST_RESPONSE", request, response);
@@ -32,6 +27,7 @@ public class PingIDServlet
     UrlUtil urlUtil = new UrlUtil(request);
     
     PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
+
     
     // if ((!validStage("stage1End", request, response)) || (!validResetType(configuration.getResetType()))) {
     //   PwdResetAuditLogger.logFailure("Invalid state (unauthorized method)");
@@ -86,11 +82,11 @@ public class PingIDServlet
     
     PasswordManagementConfiguration configuration = getPasswordManagementConfiguration(request, response);
     
-    if ((!validStage("stage2Start", request, response)) || (!validResetType(configuration.getResetType()))) {
-      PwdResetAuditLogger.logFailure("Invalid state (unauthorized method)");
-      redirect(response, urlUtil.buildErrorUrl("forgot-password-error.invalidState"));
-      return;
-    }
+    // if ((!validStage("stage2Start", request, response)) || (!validResetType(configuration.getResetType()))) {
+    //   PwdResetAuditLogger.logFailure("Invalid state (unauthorized method)");
+    //   redirect(response, urlUtil.buildErrorUrl("forgot-password-error.invalidState"));
+    //   return;
+    // }
     
     PingIDForm form = new PingIDForm(this.sessionUtil, request, response);
     PwdResetAuditLogger.setUserName(form.getUsername());
@@ -109,7 +105,7 @@ public class PingIDServlet
       break;
     case Canceled: 
       PwdResetAuditLogger.logFailure("PingID authentication canceled");
-      String url = urlUtil.buildCancelUrl(form.getTargetResource());
+      url = urlUtil.buildCancelUrl(form.getTargetResource());
       clearState(request, response);
       redirect(response, url);
       break;
@@ -136,8 +132,3 @@ public class PingIDServlet
   }
 }
 
-
-/* Location:              D:\workhouse\PasswordReset\myformadapter\src\!\com\pingidentity\adapters\htmlform\pwdreset\servlet\PingIDServlet.class
- * Java compiler version: 8 (52.0)
- * JD-Core Version:       0.7.1
- */
